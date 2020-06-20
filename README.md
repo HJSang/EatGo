@@ -992,4 +992,50 @@ func main() {
 	fmt.Println("The value:", v, "Present?", ok)
 }
 ```
+## Function values
+* Functions are values too. They can be passed around just like other values. Function values may be used as function arguments and return values.
+```go
+package main
+
+import (
+  "fmt"
+  "math"
+)
+  
+func compute(fn func(float64, float64) float64) float64 {
+  return fn(3,4)
+}
+
+func main() {
+  hypot := func(x,y float64) float64 {
+    return math.Sqtr(x*x + y*y)
+  }
+  fmt.Println(hypot(5,12))
+
+  fmt.Println(compute(hypot))
+  fmt.Println(compute(math.Pow))
+}
+```
+* Function closures
+  * Go functions may be closures. A closure is a function value that references varaibles from outside its body. The function may access and assign to the referenced variables; in this sense the function is "bound" to the variables. 
+```go
+package main
+
+import "fmt"
+
+func adder() func(int) int {
+  sum := 0
+  return func(x int) int {
+    sum += x
+    return sum
+  }
+}
+
+func main() {
+  pos, neg := adder(), adder()
+  for i := 0; i < 10; i++ {
+    fmt.Println( pos(i), neg(-2*i))
+  }
+}
+```
 
