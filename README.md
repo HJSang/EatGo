@@ -808,3 +808,81 @@ func main() {
   }
 }
 ```
+* Appending to a slice
+  * It is common to append new elements to a slice, and so Go provides a built-in append function
+  ```
+  func append(s []T, vs ...T) []T
+  ```
+  * The first parameter `s` of `append` is a slice of type T, and the rest are T values to append to the slice.
+  * The resulting value of `append` is a slice containing all the elements of the original slice plus the provided values.
+  * If the backing array of `s` is too small to fit all the given values a bigger array will be allocated. The returned slice will point to the newly allocated array.
+```go 
+package main
+
+import "fmt"
+
+func main() {
+  var s []int
+  printSlce(s)
+
+  //append works on nil slices 
+  s = append(s,0)
+  printSlice(s)
+
+  // The slice grows as needed
+  s = append(s,1)
+  printSlice(s)
+
+  // We can add more than one elements
+  s = append(s, 2,3,4)
+  printSlice(s)
+}
+
+func printSlice(s []int) {
+  fmt.Println("len=%d cap=%d %v\n", len(s), cap(s), s)
+}
+```
+* **Range**:
+  * The `range` form of the `for` loop iterates over a slie or map.
+  * When ranging over a slice, two values are returned for each iteration. The first is the index, and the second is a copy of the element at that index. 
+
+```go
+package main
+
+import "fmt"
+
+var pow = []int{1,2,4,8,16,32,64,128}
+
+func main() {
+  for i, v := range pow {
+    fmt.Printf("2**%d = %d\n", i, v)
+  }
+}
+```
+* Range continued
+  * You can skip the index or value by assigning to `_`.
+  ```
+  for i, _ := range pow
+  for _, value := range pow
+  ```
+  * if you only want to the index, you can omit the second variable.
+  ```
+  for i := range pow
+  ```
+```go
+package main
+
+import "fmt"
+
+func main() {
+  pow := make([]int, 10)
+  for i := range pow {
+    pow[i] = 1 << unit(i) // == 2**i
+  }
+  for _, value := range pow {
+    fmt.Printf("%d\n", value)
+  }
+}
+```
+
+
