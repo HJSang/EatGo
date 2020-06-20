@@ -82,3 +82,39 @@ func main() {
   fmt.Println(add(42,13))
 }
 ```
+* When two or more consecutive named function parameters share a type, you can omit the type from all but the last.
+* A function can return any number of results.
+```go
+package main
+
+import "fmt"
+
+func swap(x,y string) (string, string) {
+  return y,x
+}
+
+func main() {
+  a, b := swap("hello", "world")
+  fmt.Println(a,b)
+}
+```
+* Named return values:
+   * Go's return values may be named. If so, they are treated as variables defined at the top f the function.
+   * A `return` statement without arguments returns the named return values. This is known as a "naked" return.
+   * Naked return statements should be used only in short functions, as with the sample shown here. 
+```go
+package main
+
+import "fmt"
+
+func split(sum int) (x,y int) {
+  x = sum*4 / 9
+  y = sum - x
+  return
+}
+
+func main() {
+  fmt.Println(split(17))
+}
+```
+
