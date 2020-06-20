@@ -240,4 +240,60 @@ i :=42
 f := float64(i)
 u := uint(f)
 ```
-* Unlike in C, in Go assignment between items of different type requires an explicit conversion
+* Unlike in C, in Go assignment between items of different type requires an explicit conversion.
+* Type inference:
+  * When declaring a variable without specifying an explicit type( either by using the `:=` syntax or `var=` expression syntax), the variable's type is inferred from the value on the right side.
+```
+var i int
+j := i // j is an int
+
+i := 42 //int
+f := 3.142 //float64
+g := 0.867 + 0.5i //complex128
+```
+# Constants
+* Constants are declared like variables, but with the `const` keyword.
+* Constants can be character, string, boolean, or numeric values.
+* Constants cannot be declared using the := syntax.
+```go
+package main
+
+import "fmt"
+
+const Pi = 3.14
+
+func main() {
+	const World = "世界"
+	fmt.Println("Hello", World)
+	fmt.Println("Happy", Pi, "Day")
+
+	const Truth = true
+	fmt.Println("Go rules?", Truth)
+}
+```
+* Numeric Constants: Numeric constants are high-precision values.
+* An untyped constant takes the type needed by its context.
+```go
+package main
+
+import "fmt"
+
+const (
+	// Create a huge number by shifting a 1 bit left 100 places.
+	// In other words, the binary number that is 1 followed by 100 zeroes.
+	Big = 1 << 100
+	// Shift it right again 99 places, so we end up with 1<<1, or 2.
+	Small = Big >> 99
+)
+
+func needInt(x int) int { return x*10 + 1 }
+func needFloat(x float64) float64 {
+	return x * 0.1
+}
+
+func main() {
+	fmt.Println(needInt(Small))
+	fmt.Println(needFloat(Small))
+	fmt.Println(needFloat(Big))
+}
+```
