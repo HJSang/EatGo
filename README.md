@@ -1038,4 +1038,220 @@ func main() {
   }
 }
 ```
+## Methods
+* Go does not have classes. However, you can define methods on types.
+* A method is a function with a special *receiver* argument.
+* The receiver appears in its own argument list between the `func` keyword and the method name.
+
+``go
+package main
+
+import (
+  "fmt"
+  "math"
+)
+
+type Vertex struct {
+  X, Y float64
+}
+
+func (v Vertext) Abs() float64 {
+  return math.Sqrt(v.X*v.X + v.Y*v.Y)
+}
+
+func main() {
+  v := Vertex{3,4}
+  fmt.Println(v.Abs())
+}
+```
+* Methods are functions: a method is just a function with a receiver argument.
+```go
+package main
+
+import (
+  "fmt"
+  "math"
+)
+
+type Vertex struct {
+  X, Y float64
+}
+
+func Abs(v Vertex) float64 {
+  return math.Sqrt(v.X*v.X + v.Y*v.Y)
+}
+
+func main() {
+  v := Vertex{3,4}
+  fmt.Println(Abs(v))
+}
+```
+* You can declare a method on non-struct types, too.
+```go 
+package main
+
+import (
+  "fmt"
+  "math"
+)
+
+type MyFloat float64
+
+func (f MyFloat) Abs() float64 {
+  if f < 0 {
+    return float64(-f)
+  }
+  return float64(f)
+}
+
+func main() {
+  f := MyFloat(-math.Sqrt(2))
+  fmt.Println(f.Abs())
+}
+```
+* Pointer receivers 
+  * You can declare methods with pointer recievers.
+  * This means the receiver types has the literal syntax `*T` for some type `T`. ( Also, `T` cannot itself be a pointer such as `*int`.)
+  * Methods with pointer receivers can modify the value to which the receiver points. Since methods often need to modify their receiever, pointer receivers are more common than value recievers.
+  * With a value reciever, the method operates on a copy of the original value.
+```go 
+package main
+
+import ( 
+  "fmt"
+  "math"
+)
+
+type Vertex struct {
+  X, Y float64
+}
+
+func (v Vertex) Abs() float64 {
+  return math.Sqrt(v.X*v.X + v.Y*v.Y)
+}
+
+func (v *Vertex) Scale() float64 {
+  v.X = v.X * f
+  v.Y = v.Y * f
+}
+
+func main() {
+  v := Vertex{3,4}
+  v.Scale(10)
+  fmt.Println(v.Abs())
+}
+```
+* The functions with a pointer argument must take a pointer.
+* While methods with pointer receivers take either a value or a pointer as the receiver whne they are called.
+```go 
+package main
+
+import "fmt"
+
+type Vertex struct {
+  X, Y float64
+}
+
+func (v *Vertex) Scale(f float64) {
+  v.X = v.X * f
+  v.Y = v.Y * f
+}
+
+func ScaleFunc(v *Vertex, f float64) {
+  v.X = v.X * f
+  v.Y = v.Y * f
+}
+
+func main() {
+  v := Vertex{3,4}
+  v.Scale(2)
+  ScaleFunc(&v, 10)
+
+  p := &Vertex{4,3}
+  p.Scale(3)
+  ScaleFunc(p,8)
+  
+  fmt.Println(v, p)
+}
+```
+* Functions that take a value argument must take a value of that specific type
+* While methods with value receivers take either a value or a pointer as the receiver when they are clalled
+```go
+package main
+
+import ( 
+  "fmt"
+  "math"
+)
+
+type Vertex struct {
+  X, Y float64
+}
+
+func (v Vertex) Abs() float64 {
+  return math.Sqrt(v.X*v.X + v.Y*v.Y)
+}
+
+func AbsFunc(v Vertex) float64 {
+  return math.Sqrt(v.X*v.X + v.Y*v.Y)
+}
+
+func main() {
+  v := Vertex{3,4}
+  fmt.Println(v.Abs())
+  fmt.Println(AbsFunc(v))
+
+  p := &Vertex{3,4}
+  fmt.Println(p.Abs())
+  fmt.Println(AbsFunc(*p))
+}
+```
+* Choosing a value or pointer receiver:
+  * There are two reasons to use a pointer receiver.
+  * The first is so that the method can modify the value that its receiver points to. 
+  * The second is to avoid copying the value on eac method call. This can be more efficient if the receiver is a larger struct.
+## Interfaces
+
+* An *interface type* is defined as a set of method signatures. 
+* A value of interface type can holdany value that implements those methods.
+```go
+package main
+
+import (
+  "fmt"
+  "math"
+)
+
+type Abser interface {
+  Abs() float64
+}
+
+func main() {
+  var a Abser
+  f := MyFloat(-math.Sqrt2)
+  v := Vertex{3,4}
+  a = f // a MyFloat implements Abser
+  a = &v // a *Vertex implements Abser
+
+  fmt.Println(a.Abs())
+}
+
+type MyFloat float64
+
+func (f MyFloat) Abs() float64 {
+  if f < 0 {
+    return float64(-f)
+  }
+  return float64(f)
+}
+
+type Vertex struct {
+  X, Y float64
+}
+
+func (v *Vertex) Abs() float64 {
+  return math.Sqrt(v.X*v.X + v.Y*v.Y)
+}
+```
+
 
