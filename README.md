@@ -1043,7 +1043,7 @@ func main() {
 * A method is a function with a special *receiver* argument.
 * The receiver appears in its own argument list between the `func` keyword and the method name.
 
-``go
+```go
 package main
 
 import (
@@ -1330,4 +1330,176 @@ func describe(i I) {
   fmt.Printf("%v, %T)\n", i, i)
 }
 ```
+* Interface values with nil underlying values
+  * If the concrete value inside the interface itself is nil, the method will be called with a nil receiver.
+  * Note that an interface value that holds a nil concrete value is itself non-nil.
 
+```go 
+package main
+
+import "fmt"
+
+type I interface {
+	M()
+}
+
+type T struct {
+	S string
+}
+
+func (t *T) M() {
+	if t == nil {
+		fmt.Println("<nil>")
+		return
+	}
+	fmt.Println(t.S)
+}
+
+func main() {
+	var i I
+
+	var t *T
+	i = t
+	describe(i)
+	i.M()
+
+	i = &T{"hello"}
+	describe(i)
+	i.M()
+}
+
+func describe(i I) {
+	fmt.Printf("(%v, %T)\n", i, i)
+}
+```
+* Nil interface values
+  * A nil interface value holds neither value nor concrete type.
+  * Calling a method on a nil interface is a run-time error because there is no type inside the interface tuple to indicate which concrete method to call.
+
+* The empty interface
+  * The interface type that specifies zero methods is known as the empty interface:
+  ```
+  interface{}
+  ```
+  * An empty interface may hold values of any type.
+  * Every type implements at least zero methods
+  * Empty interfaces are used by code that handles values of unknown type.
+```go 
+package main
+
+import "fmt"
+
+func main() {
+	var i interface{}
+	describe(i)
+
+	i = 42
+	describe(i)
+
+	i = "hello"
+	describe(i)
+}
+
+func describe(i interface{}) {
+	fmt.Printf("(%v, %T)\n", i, i)
+}
+```
+# Type assertions
+* A type assertion provides access to an interface value's underlying concrete value.
+```
+t := i.(T)
+```
+* This statement asserts that the interface value `i` holds the concrete type `T` and assigns the underlying `T` value to the variable `t`.
+* If `i` does not hold a `T`, the statement will trigger a panic.
+* To test whether an interface value holds a specific type, a type assertion can return two values: the underlying value and a boolean value that reports whether the assertion succeeded.
+```
+t, ok := i.(T)
+```
+* if `i` holds `T`, then `t` will be the underlying value and `ok` will be true 
+* If not, `ok` will be false and `t` will be the zero value of type `T`, and no panic occurs.
+```go
+package main
+
+import "fmt"
+
+func main() {
+	var i interface{} = "hello"
+
+	s := i.(string)
+	fmt.Println(s)
+
+	s, ok := i.(string)
+	fmt.Println(s, ok)
+
+	f, ok := i.(float64)
+	fmt.Println(f, ok)
+
+	f = i.(float64) // panic
+	fmt.Println(f)
+}
+```
+# Type switches 
+* A type switch is a construct that permits several type assertions in series. 
+* A type switch is like a regular switch statement, but the cases in a type switch specify types.
+* Those values are compared against the type of the value held by the given interface value.
+```
+switch v := i.(type)
+case T:
+  // here v has type T
+case S:
+  // here v has type S
+default:
+  //no match; here v has the same tyoe as i
+}
+```
+```go
+package main
+
+import "fmt"
+
+func do(i interface{}) {
+  switch v := i.(type)
+  case int:
+    fmt.Printf("Twice %v is %v\n", v, v*2)
+  case string:
+    fmt.Printf("%q is %v bytes long\n", v, len(v))
+  default:
+    fmt.Printf("I don't know about type %T!\n", v)
+  }
+}
+
+func main() {
+  do(21)
+  do("hello")
+  do(true)
+}
+```
+
+# Stringers 
+* One of the most ubiquitous interfaces is `Stringer` defined by the `fmt` package.
+```
+type Stringer interface {
+  String() string
+}
+```
+* A `Stringer` is a type that can describe itself as a string.
+```go
+package main
+
+import "fmt"
+
+type Person struct {
+  Name string
+  Age int
+}
+
+func (p Person) String() string {
+  return fmt.Sprintf("%v (%v year)", p.Name, p.Age)
+}
+
+func main() {
+  a := Person{"Arthur Dent", 42}
+  z := Person{"Zaphod Beeblebrox", 9001}
+  fmt.Println(a,z)
+}
+```
